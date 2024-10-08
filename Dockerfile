@@ -1,13 +1,13 @@
 FROM nginx:1.27-alpine3.19
-LABEL maintainer="Deokgyu Yang <secugyu@gmail.com>" \
-      description="Lightweight h5ai 0.30.0 container with Nginx 1.27 & PHP 8.2 based on Alpine Linux."
+LABEL maintainer="Jacob Roy <jacob@signalorange.tech>" \
+      description="Lightweight h5ai (tudorminator fork) container with Nginx 1.27 & PHP 8.2 based on Alpine Linux."
 
 RUN apk update
 RUN apk add --no-cache \
     bash bash-completion supervisor tzdata shadow \
     php82 php82-fpm php82-session php82-json php82-xml php82-mbstring php82-exif \
     php82-intl php82-gd php82-pecl-imagick php82-zip php82-opcache \
-    ffmpeg imagemagick zip apache2-utils patch
+    ffmpeg imagemagick zip apache2-utils patch git
 
 # Environments
 ENV PUID=911
@@ -25,7 +25,9 @@ COPY config/php_set_memory_limit.ini /etc/php82/conf.d/00_memlimit.ini
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Copy h5ai
-COPY config/_h5ai /usr/share/h5ai/_h5ai
+#COPY config/_h5ai /usr/share/h5ai/_h5ai
+RUN git clone https://github.com/tudorminator/h5ai
+RUN mv h5ai/src/_h5ai /usr/share/h5ai/
 
 # Configure Nginx server
 RUN sed --in-place=.bak 's/worker_processes  1/worker_processes  auto/g' /etc/nginx/nginx.conf
@@ -38,5 +40,4 @@ ADD config/h5ai.conf.htpasswd.patch /
 RUN chmod a+x /init.sh
 
 EXPOSE 80
-VOLUME [ "/config", "/h5ai" ]
-ENTRYPOINT [ "/init.sh" ]
+ENTRYPOINT [ "/bin/bash", "/init.sh" ]

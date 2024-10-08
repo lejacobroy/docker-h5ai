@@ -1,0 +1,19 @@
+services:
+  docker-h5ai:
+    container_name: docker-h5ai
+    hostname: docker-h5ai
+    build: ./
+    volumes:
+      - ./config:/config
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Americas/Toronto
+      - HTPASSWD=true
+      - HTPASSWD_USER=user
+      - HTPASSWD_PW=password
+    #expose:
+    #  - 80
+    ports:
+      - "3030:80"
+    restart: unless-stopped
